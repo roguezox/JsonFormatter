@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, Check, Search, Flag } from 'lucide-react';
+import { Copy, Check, Search, Flag, Wand2 } from 'lucide-react';
 import { testRegex } from './RegexTesterLogic';
 import CodeArea from '../common/CodeArea';
 import Button from '../common/Button';
+import AIRegexHelper from './AIRegexHelper';
 
 interface RegexTesterProps {
   darkMode: boolean;
@@ -19,6 +20,7 @@ const RegexTester: React.FC<RegexTesterProps> = ({ darkMode }) => {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showAIHelper, setShowAIHelper] = useState(false);
 
   const flagOptions = [
     { value: 'g', label: 'Global (g)', description: 'Find all matches' },
@@ -59,6 +61,11 @@ const RegexTester: React.FC<RegexTesterProps> = ({ darkMode }) => {
     }
   };
 
+  const handlePatternGenerated = (newPattern: string) => {
+    setPattern(newPattern);
+    setShowAIHelper(false);
+  };
+
   // Run test when pattern, text, or flags change (debounced)
   useEffect(() => {
     if (pattern && text) {
@@ -73,10 +80,27 @@ const RegexTester: React.FC<RegexTesterProps> = ({ darkMode }) => {
   return (
     <div className="space-y-6 animate-fadeIn">
       <div>
-        <label className={`block font-medium mb-2 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
-          Regular Expression
-        </label>
-        <div className="flex space-x-2">
+        <div className="flex justify-between items-center mb-2">
+          <label className={`font-medium ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+            Regular Expression
+          </label>
+          <Button
+            onClick={() => setShowAIHelper(!showAIHelper)}
+            darkMode={darkMode}
+            small
+            variant="secondary"
+          >
+            <Wand2 size={16} className="mr-1" />
+            AI Helper
+          </Button>
+        </div>
+        
+        {showAIHelper ? (
+          <AIRegexHelper 
+            darkMode={darkMode} 
+            onPatternGenerated={handlePatternGenerated} 
+          />
+        ) : (
           <div className={`flex-grow rounded-l border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-300'}`}>
             <div className="flex">
               <span className={`px-3 py-2 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>/</span>
@@ -93,7 +117,7 @@ const RegexTester: React.FC<RegexTesterProps> = ({ darkMode }) => {
               </span>
             </div>
           </div>
-        </div>
+        )}
       </div>
       
       <div className="flex flex-wrap gap-2">
